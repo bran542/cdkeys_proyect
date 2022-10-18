@@ -62,7 +62,14 @@
             header('Location: /cdkeys_proyect/view_administrator.php');
 
             break;
+        case 'Cancel':
+            header('Location: /cdkeys_proyect/view_administrator.php');
+            break;
     }
+    //print products
+    $stmt = $conn->prepare("SELECT * FROM products");
+    $stmt->execute();
+    $list_products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <?php include("templates/header.php") ?>
@@ -137,15 +144,18 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <?php foreach ($list_products as $product) {?>
                     <tr>
-                        <td>id</td>
-                        <td>name</td>
-                        <td>description</td>
-                        <td>price</td>
-                        <td>stock</td>
-                        <td>created at</td>
-                        <td>image</td>
-                        <td>users_idusers</td>
+                        <td><?php echo $product['id']; ?></td>
+                        <td><?php echo $product['name']; ?></td>
+                        <td><?php echo $product['description']; ?></td>
+                        <td><?php echo $product['price']; ?></td>
+                        <td><?php echo $product['stock']; ?></td>
+                        <td><?php echo $product['created_at']; ?></td>
+                        <td>
+                            <img class="img-thumbnail rounded" src="img/<?php echo $product['image']; ?>" width="50" alt="" srcset="">
+                        </td>
+                        <td><?php echo $product['users_idusers']; ?></td>
                         <td>
                             <form action="" method="POST">
                                 <input type="submit" name="txtID" id="txtID" value="id">
@@ -154,6 +164,7 @@
                             </form>
                         </td>
                     </tr>
+                    <?php } ?>
                 </tbody>
             </table>
         </div>
