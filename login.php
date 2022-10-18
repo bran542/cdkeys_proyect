@@ -2,6 +2,11 @@
     //session_start();
     include("configuration/db.php");
 
+    //validation that there is a logged in user
+    if (isset($_SESSION['user_id'])) {
+        header('Location: /cdkeys_proyect/view_administrator.php');
+    }
+
     if (!empty($_POST['email']) && !empty($_POST['password'])){
         $query = "SELECT id, email, password FROM users WHERE email=:email";
         $stmt = $conn->prepare($query);

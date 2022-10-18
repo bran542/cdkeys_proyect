@@ -1,6 +1,11 @@
 <?php 
     include("configuration/db.php");
 
+    //validation that there is a logged in user
+    if (isset($_SESSION['user_id'])) {
+        header('Location: /cdkeys_proyect/view_administrator.php');
+    }
+
     $message = '';
 
     if (!empty($_POST['email']) && !empty($_POST['password']) && !empty($_POST['confirm_password'])) {

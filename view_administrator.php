@@ -13,6 +13,12 @@
     //session_start();
     include('configuration/db.php');
 
+    //validation that no user is connected
+    if (empty($_SESSION['user_id'])) {
+        header('Location: /cdkeys_proyect/login.php');
+    }
+
+
     if (isset($_SESSION['user_id'])) {
         $stmt = $conn->prepare('SELECT * FROM users WHERE id = :id');
         //replace
@@ -60,7 +66,7 @@
 ?>
 
 <?php include("templates/header.php") ?>
-
+    Welcome <?php echo $user['email']?> <a href="logout.php">Logout</a>
     <div class="row">
         <div class="col-md-3">
 
