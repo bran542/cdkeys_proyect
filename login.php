@@ -1,4 +1,5 @@
 <?php 
+    //session_start();
     include("configuration/db.php");
 
     if (!empty($_POST['email']) && !empty($_POST['password'])){

@@ -1,4 +1,63 @@
+<?php
+    //if something exists through POST we save it in the new variable
+    //otherwise the variable will be empty
+    $txtID = (isset($_POST['txtID']))?$_POST['txtID']:"";
+    $txtName = (isset($_POST['txtName']))?$_POST['txtName']:"";
+    $txtDescription = (isset($_POST['txtDescription']))?$_POST['txtDescription']:"";
+    $txtPrice = (isset($_POST['txtPrice']))?$_POST['txtPrice']:"";
+    $txtStock = (isset($_POST['txtStock']))?$_POST['txtStock']:"";
+    $txtImage = (isset($_FILES['txtImage']['name']))?$_FILES['txtImage']['name']:"";
+    $accion = (isset($_POST['accion']))?$_POST['accion']:"";
 
+    
+    //session_start();
+    include('configuration/db.php');
+
+    if (isset($_SESSION['user_id'])) {
+        $stmt = $conn->prepare('SELECT * FROM users WHERE id = :id');
+        //replace
+        $stmt->bindParam(':id', $_SESSION['user_id']);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $user = null;
+        if (count($result) > 0) {
+            $user = $result;
+        }
+    }
+
+    switch ($accion) {
+        case 'Add':
+            //add products
+            $stmt = $conn->prepare("INSERT INTO products (name, description, price, stock, image, users_idusers)
+                                                VALUES (:name, :description, :price, :stock, :image, :id);");
+            //replace
+            $stmt->bindParam(':name', $txtName);
+            $stmt->bindParam(':description', $txtDescription);
+            $stmt->bindParam(':price', $txtPrice);
+            $stmt->bindParam(':stock', $txtStock);
+            
+
+            //upload instruction for date
+            $date = new  DateTime();
+            //if an image exists, we also add the time to the image name
+            //otherwise, the empty image variable will be left with the name 'image.jpg'
+            $filename = ($txtImage!="")?$date->getTimestamp()."_".$_FILES["txtImage"]["name"]:"image.jpg";
+            //we store temporary images, it is the original image in a variable
+            $tmpImage = $_FILES["txtImage"]["tmp_name"];
+            //If this variable is occupied, move it to the following folder
+            if ($tmpImage!="") {
+                move_uploaded_file($tmpImage,"img/".$filename);
+            }
+
+            $stmt->bindParam('image', $filename);
+            $stmt->bindParam(':id', $user['id']);
+            $stmt->execute();
+            header('Location: /cdkeys_proyect/view_administrator.php');
+
+            break;
+    }
+?>
 
 <?php include("templates/header.php") ?>
 
@@ -25,17 +84,17 @@
 
                         <div class="form-group">
                             <label for="txtDescription">Description:</label>
-                            <textarea class="form-control" name="txtDescription" id="txtDescription" rows="2" placeholder="Enter product description"></textarea>
+                            <textarea class="form-control" name="txtDescription" id="txtDescription" rows="2" placeholder="Enter product description" required></textarea>
                         </div>
 
                         <div class="form-group">
                             <label for="txtPrice">Price:</label>
-                            <input type="text" class="form-control" name="txtPrice" id="txtPrice" placeholder="Enter product price">
+                            <input type="text" class="form-control" name="txtPrice" id="txtPrice" placeholder="Enter product price" required>
                         </div>
 
                         <div class="form-group">
                             <label for="txtStock">Stock:</label>
-                            <input type="number" class="form-control" name="txtStock" id="txtStock" placeholder="Enter product stock">
+                            <input type="number" class="form-control" name="txtStock" id="txtStock" placeholder="Enter product stock" required>
                         </div>
 
                         <div class="form-group">
@@ -48,6 +107,7 @@
                             <button type="submit" name="accion" value="Modify" class="btn btn-warning">Modify</button>
                             <button type="submit" name="accion" value="Cancel" class="btn btn-secondary">Cancel</button>
                         </div>
+                        <?php echo $user['id'];?>
                     </form>
                 </div>
             </div>
