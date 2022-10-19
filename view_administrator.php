@@ -1,15 +1,4 @@
 <?php
-    //if something exists through POST we save it in the new variable
-    //otherwise the variable will be empty
-    $txtID = (isset($_POST['txtID']))?$_POST['txtID']:"";
-    $txtName = (isset($_POST['txtName']))?$_POST['txtName']:"";
-    $txtDescription = (isset($_POST['txtDescription']))?$_POST['txtDescription']:"";
-    $txtPrice = (isset($_POST['txtPrice']))?$_POST['txtPrice']:"";
-    $txtStock = (isset($_POST['txtStock']))?$_POST['txtStock']:"";
-    $txtImage = (isset($_FILES['txtImage']['name']))?$_FILES['txtImage']['name']:"";
-    $accion = (isset($_POST['accion']))?$_POST['accion']:"";
-
-    
     //session_start();
     include('configuration/db.php');
 
@@ -17,7 +6,6 @@
     if (empty($_SESSION['user_id'])) {
         header('Location: /cdkeys_proyect/login.php');
     }
-
 
     if (isset($_SESSION['user_id'])) {
         $stmt = $conn->prepare('SELECT * FROM users WHERE id = :id');
@@ -32,9 +20,23 @@
         }
     }
 
+
+
+    //if something exists through POST we save it in the new variable
+    //otherwise the variable will be empty
+    $txtID = (isset($_POST['txtID']))?$_POST['txtID']:"";
+    $txtName = (isset($_POST['txtName']))?$_POST['txtName']:"";
+    $txtDescription = (isset($_POST['txtDescription']))?$_POST['txtDescription']:"";
+    $txtPrice = (isset($_POST['txtPrice']))?$_POST['txtPrice']:"";
+    $txtStock = (isset($_POST['txtStock']))?$_POST['txtStock']:"";
+    $txtImage = (isset($_FILES['txtImage']['name']))?$_FILES['txtImage']['name']:"";
+    $accion = (isset($_POST['accion']))?$_POST['accion']:"";
+
+    
+
     switch ($accion) {
         case 'Add':
-            //add products
+            //add product
             $stmt = $conn->prepare("INSERT INTO products (name, description, price, stock, image, users_idusers)
                                                 VALUES (:name, :description, :price, :stock, :image, :id);");
             //replace
@@ -62,8 +64,34 @@
             header('Location: /cdkeys_proyect/view_administrator.php');
 
             break;
+
         case 'Cancel':
             header('Location: /cdkeys_proyect/view_administrator.php');
+
+            break;
+
+        case 'Delete':
+            //query to find image with related id
+            $stmt = $conn->prepare("SELECT image FROM products WHERE id = :id");
+            //replace
+            $stmt->bindParam(':id', $txtID);
+            $stmt->execute();
+            $product = $stmt->fetch(PDO::FETCH_LAZY);
+            //delete the image from the /img folder
+            if (isset($product['image']) && ($product['image']!="image.jpg")) {
+                //we search if it exists in the /img folder
+                if (file_exists("img/".$product["image"])) {
+                    //if it exists we delete it
+                    unlink("img/".$product["image"]);
+                }
+            }
+            
+            //delete product
+            $stmt = $conn->prepare("DELETE FROM products WHERE id = :id");
+            $stmt->bindParam(':id', $txtID);
+            $stmt->execute();
+            header('Location: /cdkeys_proyect/view_administrator.php');
+            
             break;
     }
     //print products
@@ -73,7 +101,9 @@
 ?>
 
 <?php include("templates/header.php") ?>
+
     Welcome <?php echo $user['email']?> <a href="logout.php">Logout</a>
+
     <div class="row">
         <div class="col-md-3">
 
@@ -158,7 +188,7 @@
                         <td><?php echo $product['users_idusers']; ?></td>
                         <td>
                             <form action="" method="POST">
-                                <input type="submit" name="txtID" id="txtID" value="id">
+                                <input type="hidden" name="txtID" id="txtID" value="<?php echo $product['id']; ?>">
                                 <input type="submit" name="accion" value="Select" class="btn btn-success">
                                 <input type="submit" name="accion" value="Delete" class="btn btn-danger">
                             </form>
