@@ -70,6 +70,22 @@
 
             break;
 
+        case 'Select':
+            $stmt = $conn->prepare("SELECT * FROM products WHERE id = :id");
+            //replace
+            $stmt->bindParam(':id', $txtID);
+            $stmt->execute();
+            //fetch to load the data 1 to 1
+            //FETCH_LAZY to fill in the select fields
+            $product = $stmt->fetch(PDO::FETCH_LAZY);
+            $txtID = $product['id'];
+            $txtName = $product['name'];
+            $txtDescription = $product['description'];
+            $txtPrice = $product['price'];
+            $txtStock = $product['stock'];
+            $txtImage = $product['image'];
+            break;
+
         case 'Delete':
             //query to find image with related id
             $stmt = $conn->prepare("SELECT image FROM products WHERE id = :id");
@@ -117,31 +133,35 @@
                 
                         <div class="form-group">
                             <label for="txtID">ID</label>
-                            <input type="text" class="form-control" name="txtID" id="txtID" placeholder="ID" required readonly>
+                            <input type="text" class="form-control" name="txtID" id="txtID" value="<?php echo $txtID; ?>" placeholder="ID" required readonly>
                         </div>
 
                         <div class="form-group">
                             <label for="txtName">Name</label>
-                            <input type="text" class="form-control" name="txtName" id="txtName" placeholder="Enter product name" required autofocus>
+                            <input type="text" class="form-control" name="txtName" id="txtName" value="<?php echo $txtName; ?>" placeholder="Enter product name" required autofocus>
                         </div>
 
                         <div class="form-group">
                             <label for="txtDescription">Description:</label>
-                            <textarea class="form-control" name="txtDescription" id="txtDescription" rows="2" placeholder="Enter product description" required></textarea>
+                            <textarea class="form-control" name="txtDescription" id="txtDescription" rows="2" placeholder="Enter product description" required><?php echo $txtDescription; ?></textarea>
                         </div>
 
                         <div class="form-group">
                             <label for="txtPrice">Price:</label>
-                            <input type="text" class="form-control" name="txtPrice" id="txtPrice" placeholder="Enter product price" required>
+                            <input type="text" class="form-control" name="txtPrice" id="txtPrice" value="<?php echo $txtPrice; ?>" placeholder="Enter product price" required>
                         </div>
 
                         <div class="form-group">
                             <label for="txtStock">Stock:</label>
-                            <input type="number" class="form-control" name="txtStock" id="txtStock" placeholder="Enter product stock" required>
+                            <input type="number" class="form-control" name="txtStock" id="txtStock" value="<?php echo $txtStock; ?>" placeholder="Enter product stock" required>
                         </div>
 
                         <div class="form-group">
                             <label for="txtImage">Image:</label>
+
+                            <?php if ($txtImage!="") { ?>
+                                <img class="img-thumbnail rounded" src="img/<?php echo $txtImage; ?>" width="50" alt="" srcset="">
+                            <?php } ?>
                             <input type="file" class="form-control" name="txtImage" id="txtImage">
                         </div><br>
 
