@@ -70,6 +70,50 @@
 
             break;
 
+        case 'Modify':
+            //update product data
+            $stmt = $conn->prepare("UPDATE products SET name=:name, description=:description, price=:price, stock=:stock WHERE id = :id");
+            $stmt->bindParam(':name', $txtName);
+            $stmt->bindParam(':description', $txtDescription);
+            $stmt->bindParam(':price', $txtPrice);
+            $stmt->bindParam(':stock', $txtStock);
+            $stmt->bindParam(':id', $txtID);
+            $stmt->execute();
+
+            //if the image variable has a name we assign it otherwise we use the default name
+            if ($txtImage!="") {
+                $date = new DateTime();
+                $filename = ($txtImage!="")?$date->getTimestamp()."_".$_FILES["txtImage"]["name"]:"image.jpg";
+                $tmpImage = $_FILES["txtImage"]["tmp_name"];
+
+                move_uploaded_file($tmpImage,"img/".$filename);
+
+
+                $stmt = $conn->prepare("SELECT image FROM products WHERE id = :id");
+                $stmt->bindParam(':id', $txtID);
+                $stmt->execute();
+                $product = $stmt->fetch(PDO::FETCH_LAZY);
+
+                //If there is an image with a unique name, we delete it from the /img folder.
+                if (isset($product['image']) && ($product['image']!="image.jpg")) {
+
+                    if (file_exists("img/".$product["image"])) {
+
+                        unlink("img/".$product["image"]);
+                    }
+                }
+
+                //update product image
+                $stmt = $conn->prepare("UPDATE products SET image = :image WHERE id = :id");
+                $stmt->bindParam(':image', $filename);
+                $stmt->bindParam(':id', $txtID);
+                $stmt->execute();
+            }
+
+            header('Location: /cdkeys_proyect/view_administrator.php');
+            
+            break;
+
         case 'Select':
             $stmt = $conn->prepare("SELECT * FROM products WHERE id = :id");
             //replace
